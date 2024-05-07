@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { TextMessageService } from './text-message.service';
 import { CreateTextMessageDto } from './dto/create-text-message.dto';
 import { UpdateTextMessageDto } from './dto/update-text-message.dto';
@@ -23,7 +31,10 @@ export class TextMessageController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTextMessageDto: UpdateTextMessageDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateTextMessageDto: UpdateTextMessageDto,
+  ) {
     return this.textMessageService.update(+id, updateTextMessageDto);
   }
 

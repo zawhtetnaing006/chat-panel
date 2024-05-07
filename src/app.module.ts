@@ -6,10 +6,17 @@ import { UserModule } from './user/user.module';
 import { MessageModule } from './message/message.module';
 import { TextMessageModule } from './text-message/text-message.module';
 import { FileMessageModule } from './file-message/file-message.module';
+import { PrismaService } from './prisma/prisma.service';
 
 @Module({
-  imports: [RoomModule, UserModule, MessageModule, TextMessageModule, FileMessageModule],
+  imports: [
+    RoomModule,
+    UserModule,
+    MessageModule,
+    TextMessageModule,
+    FileMessageModule,
+  ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, PrismaService],
 })
 export class AppModule {}
