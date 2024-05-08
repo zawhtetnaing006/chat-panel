@@ -6,3 +6,5 @@ COPY ./src ./src
 COPY ./nest-cli.json ./nest-cli.json
 COPY ./tsconfig.build.json ./tsconfig.build.json
 COPY ./tsconfig.json ./tsconfig.json
+RUN npm install
+RUN npm run build
