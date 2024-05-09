@@ -23,12 +23,12 @@ model User {
 }
 
 model Room {
-  id                        String          @unique @id
+  id                        String          @unique @id @default(uuid())
   name                      String          
   created_at                DateTime        @default(now())
   updated_at                DateTime        @updatedAt
   deleted_at                DateTime?
-  rooms                     UserRoom[]
+  users                    UserRoom[]
 }
 
 model UserRoom {

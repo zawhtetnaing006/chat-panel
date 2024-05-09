@@ -1,1 +1,4 @@
-export class CreateRoomDto {}
+export class CreateRoomDto {
+  name: string;
+  users: string[];
+}
