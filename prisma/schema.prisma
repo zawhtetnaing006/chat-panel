@@ -19,4 +19,25 @@ model User {
   created_at                DateTime        @default(now())
   updated_at                DateTime        @updatedAt
   deleted_at                DateTime?
+  rooms                     UserRoom[]
+}
+
+model Room {
+  id                        String          @unique @id
+  name                      String          
+  created_at                DateTime        @default(now())
+  updated_at                DateTime        @updatedAt
+  deleted_at                DateTime?
+  rooms                     UserRoom[]
+}
+
+model UserRoom {
+  user                      User            @relation(fields: [user_id], references: [id])
+  user_id                   String
+  room                      Room            @relation(fields: [room_id], references: [id])
+  room_id                   String
+  created_at                DateTime        @default(now())
+  updated_at                DateTime        @updatedAt
+  deleted_at                DateTime?
+  @@id([user_id, room_id])
 }
