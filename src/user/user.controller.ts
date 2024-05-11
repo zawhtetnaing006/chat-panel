@@ -69,15 +69,10 @@ export class UserController {
       return new ApiResponse(['User not found'], HttpStatus.NOT_FOUND);
     }
     user = await this.userService.update(id, updateUserDto);
-    if (user) {
-      return new ApiResponse(
-        ['Successfully updated user.'],
-        HttpStatus.OK,
-        user,
-      );
-    } else {
+    if (!user) {
       return new ApiResponse(['User update failed.'], HttpStatus.NOT_MODIFIED);
     }
+    return new ApiResponse(['Successfully updated user.'], HttpStatus.OK, user);
   }
 
   @Delete(':id')

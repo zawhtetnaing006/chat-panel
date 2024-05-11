@@ -58,8 +58,9 @@ export class UserService {
   }
 
   async remove(id: string) {
-    const result = await this.prisma.user.delete({
+    const result = await this.prisma.user.update({
       where: { id },
+      data: { deleted_at: new Date() },
     });
 
     return result;

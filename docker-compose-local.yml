@@ -33,9 +33,9 @@ services:
   #     npx prisma generate &&
   #     npx prisma migrate deploy &&
   #     npm run start:dev"
-  adminer:
-    image: adminer
-    ports:
-      - '8080:8080'
-    networks: 
-      - chat-panel-network
+  # adminer:
+  #   image: adminer
+  #   ports:
+  #     - '8080:8080'
+  #   networks: 
+  #     - chat-panel-network

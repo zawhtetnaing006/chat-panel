@@ -64,6 +64,11 @@ export class RoomService {
     return rooms;
   }
 
+  async count() {
+    const count = await this.prisma.room.count();
+    return count;
+  }
+
   findOne(id: string) {
     const room = this.prisma.room.findUnique({
       where: {
@@ -109,7 +114,25 @@ export class RoomService {
     return result;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} room`;
+  async remove(id: string) {
+    const result = await this.prisma.room.update({
+      where: { id },
+      data: { deleted_at: new Date() },
+      include: {
+        users: {
+          select: {
+            user: {
+              select: {
+                id: true,
+                nickname: true,
+              },
+            },
+            created_at: true,
+          },
+        },
+      },
+    });
+
+    return result;
   }
 }
