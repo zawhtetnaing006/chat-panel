@@ -7,6 +7,8 @@ import { MessageModule } from './message/message.module';
 import { TextMessageModule } from './text-message/text-message.module';
 import { FileMessageModule } from './file-message/file-message.module';
 import { PrismaService } from './prisma/prisma.service';
+import { AuthModule } from './auth/auth.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -15,6 +17,8 @@ import { PrismaService } from './prisma/prisma.service';
     MessageModule,
     TextMessageModule,
     FileMessageModule,
+    AuthModule,
+    PrismaModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
