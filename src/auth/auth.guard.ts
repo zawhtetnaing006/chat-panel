@@ -3,10 +3,11 @@ import { Request } from 'express';
 import { Observable } from 'rxjs';
 
 import { JsonWebTokenError, JwtService, TokenExpiredError } from '@nestjs/jwt';
+import { AuthService } from './auth.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(private readonly jwtService: JwtService, private readonly authService: AuthService) {}
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
@@ -18,9 +19,10 @@ export class AuthGuard implements CanActivate {
       isAuthenicated = true;
     }
 
-    if(token) {
+    if(token && isAuthenicated === false) {
       try {
         const payload = this.jwtService.verify(token);
+        this.authService.setUser(payload);
         isAuthenicated = true;
       } catch (err) {
         if(err instanceof TokenExpiredError) {
