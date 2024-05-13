@@ -17,9 +17,7 @@ export class AuthGuard implements CanActivate {
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
   ) {}
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  async canActivate(context: ExecutionContext) {
     let isAuthenicated = false;
     const req = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(req);
@@ -27,10 +25,8 @@ export class AuthGuard implements CanActivate {
       req.headers.clientkey,
     );
     if (apiSecret && apiSecret == process.env.API_SECRET) {
-      this.userService.findOne(user_id).then((result) => {
-        console.log(result);
-        req.user = result;
-      });
+      const result = await this.userService.findOne(user_id);
+      req.user = result;
       isAuthenicated = true;
     }
 
