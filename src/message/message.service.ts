@@ -3,7 +3,8 @@ import { sendMessageDto } from './dto/send-message.dto';
 
 @Injectable()
 export class MessageService {
-  sendMessage(sendMessageDto: sendMessageDto) {
+  sendMessage(room_id: string, sendMessageDto: sendMessageDto) {
+    console.log(room_id);
     console.log(sendMessageDto);
   }
 }

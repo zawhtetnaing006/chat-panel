@@ -18,7 +18,7 @@ export class AuthController {
     private readonly userService: UserService,
   ) {}
 
-  @Post('/init/:id')
+  @Post('/init')
   async init(@Body() createAuthDto: CreateAuthDto) {
     const user = await this.userService.findOne(createAuthDto.user_id);
     if (!user) {

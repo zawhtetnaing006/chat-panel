@@ -20,6 +20,7 @@ model User {
   updated_at                DateTime        @updatedAt
   deleted_at                DateTime?
   rooms                     UserRoom[]
+  messages                  Message[]
 }
 
 model Room {
@@ -28,6 +29,7 @@ model Room {
   created_at                DateTime        @default(now())
   updated_at                DateTime        @updatedAt
   deleted_at                DateTime?
+  messages                  Message[]
   users                    UserRoom[]
 }
 
@@ -40,4 +42,22 @@ model UserRoom {
   updated_at                DateTime        @updatedAt
   deleted_at                DateTime?
   @@id([user_id, room_id])
+}
+
+model Message {
+  id                        String          @unique @id @default(uuid())
+  room_id                   String
+  room                      Room            @relation(fields: [room_id],references: [id])
+  text_message              TextMessage?     
+  user_id                   String
+  user                      User            @relation(fields: [user_id],references: [id])
+  created_at                DateTime        @default(now())
+  deleted_at                DateTime?
+}
+
+model TextMessage {
+  id                        String          @unique @id @default(uuid())
+  content                   String          @db.Text
+  message_id                String          @unique
+  message                   Message         @relation(fields: [message_id],references: [id])
 }
