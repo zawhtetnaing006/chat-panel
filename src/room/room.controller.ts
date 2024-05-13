@@ -12,13 +12,14 @@ import {
 import { RoomService } from './room.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { findAllRoomDto } from './dto/find-all-room.dto';
 import { Room } from './entities/room.entity';
 import { ApiResponse } from 'src/helper/api-response';
 
 @Controller('room')
 @ApiTags('Rooms')
+@ApiBearerAuth()
 export class RoomController {
   constructor(private readonly roomService: RoomService) {}
 
