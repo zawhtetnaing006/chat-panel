@@ -3,7 +3,7 @@ import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { findAllRoomDto } from './dto/find-all-room.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma, Room, User } from '@prisma/client';
 
 @Injectable()
 export class RoomService {
@@ -134,5 +134,9 @@ export class RoomService {
     });
 
     return result;
+  }
+
+  async join(user_id: User['id'], room_id: Room['id']) {
+    return `This action join the user[${user_id}] to the room[${room_id}]`;
   }
 }

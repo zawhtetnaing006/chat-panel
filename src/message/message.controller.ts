@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Param, Request, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  Request,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { MessageService } from './message.service';
 import { sendMessageDto } from './dto/send-message.dto';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
@@ -24,16 +32,27 @@ export class MessageController {
     @Body() sendMessageDto: sendMessageDto,
     @Request() req,
   ) {
-    if(!req.user) {
-      throw new HttpException('Invalid token or incomplete client key!',HttpStatus.BAD_REQUEST)
+    if (!req.user) {
+      throw new HttpException(
+        'Invalid token or incomplete client key! Missing user info',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const room = await this.roomService.findOne(room_id);
-    if(!room) {
-      return new ApiResponse(['Room not found!'],HttpStatus.NOT_FOUND);
+    if (!room) {
+      return new ApiResponse(['Room not found!'], HttpStatus.NOT_FOUND);
     }
 
-    const message = await this.messageService.sendMessage(room_id,req.user.id, sendMessageDto);
-    return new ApiResponse(['Successfully sent message!'],HttpStatus.OK,message);
+    const message = await this.messageService.sendMessage(
+      room_id,
+      req.user.id,
+      sendMessageDto,
+    );
+    return new ApiResponse(
+      ['Successfully sent message!'],
+      HttpStatus.OK,
+      message,
+    );
   }
 }

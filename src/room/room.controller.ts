@@ -8,11 +8,18 @@ import {
   Delete,
   Query,
   HttpStatus,
+  Request,
+  HttpException,
 } from '@nestjs/common';
 import { RoomService } from './room.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
-import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { findAllRoomDto } from './dto/find-all-room.dto';
 import { Room } from './entities/room.entity';
 import { ApiResponse } from 'src/helper/api-response';
@@ -27,11 +34,42 @@ export class RoomController {
   @ApiOkResponse({ type: Room })
   async create(@Body() createRoomDto: CreateRoomDto) {
     const result = await this.roomService.create(createRoomDto);
+    if (!result) {
+      return new ApiResponse(
+        ['Failed to create room! Please confirm that you use valid user ids'],
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     return new ApiResponse(
       ['Room successfully crated!'],
       HttpStatus.CREATED,
       result,
     );
+  }
+
+  @Post(':room_id/join')
+  async join(@Param('room_id') room_id: string, @Request() req) {
+    if (!req.user) {
+      throw new HttpException(
+        'Invalid token or incomplete client key! Missing user info',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const room = await this.roomService.findOne(room_id);
+    if (!room) {
+      return new ApiResponse(['Room not found!'], HttpStatus.NOT_FOUND);
+    }
+
+    const result = await this.roomService.join(req.user.id, room_id);
+    if (!result) {
+      return new ApiResponse(
+        ['Failed to join room!'],
+        HttpStatus.EXPECTATION_FAILED,
+      );
+    }
+
+    return result;
   }
 
   @Get()
