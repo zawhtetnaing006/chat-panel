@@ -1,38 +1,67 @@
 import { Injectable } from '@nestjs/common';
 import { sendMessageDto } from './dto/send-message.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { send } from 'process';
+import { findAllMessageDto } from './dto/find-all-message.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class MessageService {
   constructor(private readonly prismaService: PrismaService) {}
-  async sendMessage(room_id: string, user_id: string, sendMessageDto: sendMessageDto) {
+  async sendMessage(
+    room_id: string,
+    user_id: string,
+    sendMessageDto: sendMessageDto,
+  ) {
     const message = await this.prismaService.message.create({
       data: {
         user: {
           connect: {
-            id: user_id
-          }
+            id: user_id,
+          },
         },
         room: {
           connect: {
-            id: room_id
-          }
+            id: room_id,
+          },
         },
         text_message: {
           create: {
-            content: sendMessageDto.textMessage
-          }
-        }
+            content: sendMessageDto.textMessage,
+          },
+        },
       },
       include: {
         text_message: {
           select: {
-            content: true
-          }
+            content: true,
+          },
         },
       },
     });
     return message;
+  }
+
+  async findAll(room_id: string, findAllMessageDto: findAllMessageDto) {
+    const page = Number.parseInt(findAllMessageDto.page);
+    const take = Number.parseInt(findAllMessageDto.perPage);
+    const skip = take * (page - 1);
+    const result = this.prismaService.message.findMany({
+      where: {
+        room_id: room_id,
+      },
+      include: {
+        text_message: {
+          select: {
+            content: true,
+          },
+        },
+      },
+      take,
+      skip,
+      orderBy: {
+        created_at: Prisma.SortOrder.desc,
+      },
+    });
+    return result;
   }
 }

@@ -14,12 +14,7 @@ import {
 import { RoomService } from './room.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
-import {
-  ApiBearerAuth,
-  ApiOkResponse,
-  ApiParam,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { findAllRoomDto } from './dto/find-all-room.dto';
 import { Room } from './entities/room.entity';
 import { ApiResponse } from 'src/helper/api-response';
@@ -48,6 +43,7 @@ export class RoomController {
   }
 
   @Post(':room_id/join')
+  @ApiOkResponse({ type: Room })
   async join(@Param('room_id') room_id: string, @Request() req) {
     if (!req.user) {
       throw new HttpException(
@@ -88,8 +84,11 @@ export class RoomController {
 
   @Get(':id')
   @ApiOkResponse({ type: Room })
-  async findOne(@Param('id') id: string) {
-    const room = await this.roomService.findOne(id);
+  async findOne(
+    @Param('id') id: string,
+    @Query('messageCount') messageCount: string,
+  ) {
+    const room = await this.roomService.findOne(id, messageCount);
     if (!room) {
       return new ApiResponse(['Room not found!'], HttpStatus.NOT_FOUND);
     }

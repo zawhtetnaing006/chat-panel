@@ -8,7 +8,7 @@ import { Prisma, Room, User } from '@prisma/client';
 @Injectable()
 export class RoomService {
   constructor(private prisma: PrismaService) {}
-  async create(createRoomDto: CreateRoomDto) {
+  async create(createRoomDto: CreateRoomDto): Promise<Room | null> {
     const data = {
       name: createRoomDto.name,
       users: {
@@ -37,7 +37,7 @@ export class RoomService {
     return room;
   }
 
-  async findAll(findAllRoomDto: findAllRoomDto) {
+  async findAll(findAllRoomDto: findAllRoomDto): Promise<Room[]> {
     const page = Number.parseInt(findAllRoomDto.page);
     const perPage = Number.parseInt(findAllRoomDto.perPage);
     const skip = (page - 1) * perPage;
@@ -64,13 +64,13 @@ export class RoomService {
     return rooms;
   }
 
-  async count() {
+  async count(): Promise<number> {
     const count = await this.prisma.room.count();
     return count;
   }
 
-  findOne(id: string) {
-    const room = this.prisma.room.findUnique({
+  async findOne(id: string, messageCount: string = '10'): Promise<Room | null> {
+    const room = await this.prisma.room.findUnique({
       where: {
         id,
       },
@@ -85,13 +85,36 @@ export class RoomService {
             },
             created_at: true,
           },
+          orderBy: {
+            created_at: Prisma.SortOrder.desc,
+          },
+        },
+        messages: {
+          select: {
+            id: true,
+            user: {
+              select: {
+                id: true,
+                nickname: true,
+              },
+            },
+            text_message: {
+              select: {
+                content: true,
+              },
+            },
+          },
+          take: Number.parseInt(messageCount),
+          orderBy: {
+            created_at: Prisma.SortOrder.desc,
+          },
         },
       },
     });
     return room;
   }
 
-  async update(id: string, updateRoomDto: UpdateRoomDto) {
+  async update(id: string, updateRoomDto: UpdateRoomDto): Promise<Room | null> {
     const result = await this.prisma.room.update({
       where: {
         id: id,
@@ -114,7 +137,7 @@ export class RoomService {
     return result;
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<Room | null> {
     const result = await this.prisma.room.update({
       where: { id },
       data: { deleted_at: new Date() },
@@ -130,13 +153,42 @@ export class RoomService {
             created_at: true,
           },
         },
+        messages: true,
       },
     });
 
     return result;
   }
 
-  async join(user_id: User['id'], room_id: Room['id']) {
-    return `This action join the user[${user_id}] to the room[${room_id}]`;
+  async join(user_id: User['id'], room_id: Room['id']): Promise<Room | null> {
+    const existingRoom = await this.prisma.userRoom.findFirst({
+      where: {
+        room_id,
+        user_id,
+      },
+    });
+
+    if (!existingRoom) {
+      const result = await this.prisma.userRoom.create({
+        data: {
+          user_id,
+          room_id,
+        },
+      });
+      if (!result) {
+        return null;
+      }
+    }
+
+    const room = await this.prisma.room.findFirst({
+      where: {
+        id: room_id,
+      },
+      include: {
+        users: true,
+        messages: true,
+      },
+    });
+    return room;
   }
 }
