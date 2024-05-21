@@ -18,12 +18,18 @@ import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { findAllRoomDto } from './dto/find-all-room.dto';
 import { Room } from './entities/room.entity';
 import { ApiResponse } from 'src/helper/api-response';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { JoinRoomEvent } from './events/room.join.event';
+import { ListenerResponse } from 'src/helper/listener-response';
 
 @Controller('room')
 @ApiTags('Rooms')
 @ApiBearerAuth()
 export class RoomController {
-  constructor(private readonly roomService: RoomService) {}
+  constructor(
+    private readonly roomService: RoomService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   @Post()
   @ApiOkResponse({ type: Room })
@@ -57,15 +63,40 @@ export class RoomController {
       return new ApiResponse(['Room not found!'], HttpStatus.NOT_FOUND);
     }
 
-    const result = await this.roomService.join(req.user.id, room_id);
-    if (!result) {
-      return new ApiResponse(
-        ['Failed to join room!'],
-        HttpStatus.EXPECTATION_FAILED,
+    const response = new ApiResponse();
+    const roomJoinEvent = new JoinRoomEvent(room_id, req.user.id);
+    try {
+      const results = await this.eventEmitter.emitAsync(
+        'room.join',
+        roomJoinEvent,
+      );
+
+      if (!results.every((result) => result instanceof ListenerResponse)) {
+        throw new HttpException(
+          'Invalid response from listeners',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      const mainResult = results.find((result) => result.type === 'main');
+
+      if (!mainResult) {
+        throw new HttpException(
+          'There must be one main listener',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      response.statusCode = HttpStatus.OK;
+      response.message = ['Successfully join room'];
+      response.content = mainResult.content;
+    } catch (error) {
+      throw new HttpException(
+        'Failed to jon room',
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-
-    return result;
+    return response;
   }
 
   @Get()

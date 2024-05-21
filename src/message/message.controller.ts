@@ -66,7 +66,7 @@ export class MessageController {
 
       if (!mainResult) {
         throw new HttpException(
-          'There must be at least on main listener',
+          'There must be one main listener',
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }

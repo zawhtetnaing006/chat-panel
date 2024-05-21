@@ -7,7 +7,7 @@ import {
 import { Socket, Server } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
 
-@WebSocketGateway(4100, { namespace: 'message' })
+@WebSocketGateway(4100)
 export class MessageGateway {
   @WebSocketServer()
   server: Server;
@@ -18,19 +18,15 @@ export class MessageGateway {
 
   async handleConnection(client: Socket) {
     const bearerToken = client.handshake?.headers.authorization;
-    console.log(client.id);
-    const isAuthenticated = await this.authService.verifyForWs(bearerToken);
-    if (!isAuthenticated) client.disconnect();
+    const authenticatedUser = await this.authService.verifyForWs(bearerToken);
+    if (!authenticatedUser) client.disconnect();
+    client['user'] = authenticatedUser;
   }
 
   @SubscribeMessage('new_message')
-  handleMessage(client: any, payload: any): string {
-    this.server.emit('new_message', 123);
+  handleMessage(client: Socket, payload: any): string {
+    console.log(client);
+    this.server.to(payload.room_id).emit('new_message', 123);
     return 'Hello world!';
-  }
-
-  @SubscribeMessage('join_room')
-  handleJoinRoom(client: any, payload: any): string {
-    return 'Hello Room!';
   }
 }
