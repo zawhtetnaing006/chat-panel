@@ -1,14 +1,12 @@
+import { HttpStatus } from '@nestjs/common';
+
 export class ApiResponse {
   constructor(
-    public message: string[],
-    public statusCode: number,
+    public message: string[] = ['Something went wrong'],
+    public statusCode: number = HttpStatus.INTERNAL_SERVER_ERROR,
     public content?: { [key: string]: any },
     public error?: string,
-  ) {
-    if (!error) {
-      this.error = statusCode >= 400 ? this.getErrorText(statusCode) : '';
-    }
-  }
+  ) {}
 
   private getErrorText(statusCode: number): string {
     switch (statusCode) {

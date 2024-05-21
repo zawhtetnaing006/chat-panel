@@ -4,11 +4,11 @@ import {
   Body,
   Param,
   Request,
-  HttpException,
   HttpStatus,
   Get,
   Query,
   UseGuards,
+  HttpException,
 } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { sendMessageDto } from './dto/send-message.dto';
@@ -17,6 +17,9 @@ import { RoomService } from 'src/room/room.service';
 import { ApiResponse } from 'src/helper/api-response';
 import { findAllMessageDto } from './dto/find-all-message.dto';
 import { MessageGuard } from './message.guard';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NewMessageEvent } from './events/message.new.event';
+import { ListenerResponse } from 'src/helper/listener-response';
 
 @Controller('room/:room_id/message')
 @ApiTags('Message')
@@ -30,6 +33,7 @@ export class MessageController {
   constructor(
     private readonly messageService: MessageService,
     private readonly roomService: RoomService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @Post('send')
@@ -38,21 +42,46 @@ export class MessageController {
     @Body() sendMessageDto: sendMessageDto,
     @Request() req,
   ) {
-    const room = await this.roomService.findOne(room_id);
-    if (!room) {
-      return new ApiResponse(['Room not found!'], HttpStatus.NOT_FOUND);
+    const response = new ApiResponse();
+    const newMessageEvent = new NewMessageEvent(
+      req.user.id,
+      room_id,
+      sendMessageDto.textMessage,
+    );
+
+    try {
+      const results = await this.eventEmitter.emitAsync(
+        'message.new',
+        newMessageEvent,
+      );
+
+      if (!results.every((result) => result instanceof ListenerResponse)) {
+        throw new HttpException(
+          'Invalid response from listeners',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      const mainResult = results.find((result) => result.type === 'main');
+
+      if (!mainResult) {
+        throw new HttpException(
+          'There must be at least on main listener',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      response.statusCode = HttpStatus.OK;
+      response.message = ['Successfully sent message'];
+      response.content = mainResult.content;
+    } catch (error) {
+      throw new HttpException(
+        'Failed to process message',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
-    const message = await this.messageService.sendMessage(
-      room_id,
-      req.user.id,
-      sendMessageDto,
-    );
-    return new ApiResponse(
-      ['Successfully sent message!'],
-      HttpStatus.OK,
-      message,
-    );
+    return response;
   }
 
   @Get()

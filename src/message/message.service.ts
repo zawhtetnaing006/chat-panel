@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { sendMessageDto } from './dto/send-message.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { findAllMessageDto } from './dto/find-all-message.dto';
 import { Prisma } from '@prisma/client';
@@ -7,11 +6,7 @@ import { Prisma } from '@prisma/client';
 @Injectable()
 export class MessageService {
   constructor(private readonly prismaService: PrismaService) {}
-  async sendMessage(
-    room_id: string,
-    user_id: string,
-    sendMessageDto: sendMessageDto,
-  ) {
+  async sendMessage(room_id: string, user_id: string, text_message: string) {
     const message = await this.prismaService.message.create({
       data: {
         user: {
@@ -26,7 +21,7 @@ export class MessageService {
         },
         text_message: {
           create: {
-            content: sendMessageDto.textMessage,
+            content: text_message,
           },
         },
       },

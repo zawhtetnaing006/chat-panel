@@ -15,8 +15,12 @@ export class AuthService {
     return jwt_token;
   }
 
-  async verify(token: string) {
-    const payload = await this.jwtService.verify(token);
-    return payload;
+  async verifyForWs(bearerToken: string): Promise<boolean> {
+    const [type, token] = bearerToken?.split(' ') ?? [];
+    if (type === 'Bearer') {
+      const payload = await this.jwtService.verify(token);
+      if (payload) return true;
+    }
+    return false;
   }
 }

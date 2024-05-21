@@ -6,7 +6,6 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { Observable } from 'rxjs';
 
 import { JsonWebTokenError, JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
