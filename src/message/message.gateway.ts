@@ -15,10 +15,9 @@ export class MessageGateway {
 
   constructor(private eventEmitter: EventEmitter2) {}
 
-  @SubscribeMessage('new_message')
+  @SubscribeMessage('send_message')
   handleMessage(client: Socket, payload: any) {
     try {
-      this.logger.log(client['user']);
       const parsedPayload = JSON.parse(payload);
       if (!parsedPayload || !parsedPayload.room_id) {
         throw new Error('Invalid payload format');
