@@ -5,30 +5,31 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { JoinRoomEvent } from './events/room.join.event';
-import { AuthService } from 'src/auth/auth.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Logger } from '@nestjs/common';
 
 @WebSocketGateway(4100)
 export class RoomGateway {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly eventEmiiter: EventEmitter2,
-  ) {}
+  constructor(private readonly eventEmiiter: EventEmitter2) {}
+  private readonly logger = new Logger(RoomGateway.name);
   @WebSocketServer()
   server: Server;
 
-  async handleConnection(client: Socket) {
-    const bearerToken = client.handshake?.headers.authorization;
-    const authenticatedUser = await this.authService.verifyForWs(bearerToken);
-    if (!authenticatedUser) client.disconnect();
-    client['user'] = authenticatedUser;
-  }
-
   @SubscribeMessage('join_room')
   handleJoinRoom(client: Socket, payload: any) {
-    const room_id = JSON.parse(payload).room_id;
-    const joinRoomEvent = new JoinRoomEvent(room_id, client['user']?.id);
-    this.eventEmiiter.emitAsync('room.join', joinRoomEvent);
-    this.server.socketsJoin(room_id);
+    try {
+      const parsedPayload = JSON.parse(payload);
+      if (!parsedPayload || !parsedPayload.room_id) {
+        throw new Error('Invalid payload format');
+      }
+      const room_id = parsedPayload.room_id;
+      const joinRoomEvent = new JoinRoomEvent(room_id, client['user']?.id);
+
+      this.eventEmiiter.emitAsync('room.join', joinRoomEvent);
+      this.server.socketsJoin(room_id);
+    } catch (error) {
+      this.logger.error('Error handling join_room', error);
+      client.emit('error', 'An error occured while joining the room');
+    }
   }
 }

@@ -5,27 +5,30 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
-import { AuthService } from 'src/auth/auth.service';
+import { Logger } from '@nestjs/common';
 
 @WebSocketGateway(4100)
 export class MessageGateway {
   @WebSocketServer()
   server: Server;
-  constructor(
-    private eventEmitter: EventEmitter2,
-    private authService: AuthService,
-  ) {}
+  private readonly logger = new Logger(MessageGateway.name);
 
-  async handleConnection(client: Socket) {
-    const bearerToken = client.handshake?.headers.authorization;
-    const authenticatedUser = await this.authService.verifyForWs(bearerToken);
-    if (!authenticatedUser) client.disconnect();
-    client['user'] = authenticatedUser;
-  }
+  constructor(private eventEmitter: EventEmitter2) {}
 
   @SubscribeMessage('new_message')
   handleMessage(client: Socket, payload: any) {
-    const room_id = JSON.parse(payload).room_id;
-    this.server.to(room_id).emit('new_message', payload);
+    try {
+      this.logger.log(client['user']);
+      const parsedPayload = JSON.parse(payload);
+      if (!parsedPayload || !parsedPayload.room_id) {
+        throw new Error('Invalid payload format');
+      }
+
+      const room_id = parsedPayload.room_id;
+      this.server.to(room_id).emit('new_message', payload);
+    } catch (error) {
+      this.logger.error('Error handling new_message', error);
+      client.emit('error', 'An error occurred while processing your message');
+    }
   }
 }
