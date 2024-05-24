@@ -24,9 +24,8 @@ export class MessageGateway {
   }
 
   @SubscribeMessage('new_message')
-  handleMessage(client: Socket, payload: any): string {
-    console.log(client);
-    this.server.to(payload.room_id).emit('new_message', 123);
-    return 'Hello world!';
+  handleMessage(client: Socket, payload: any) {
+    const room_id = JSON.parse(payload).room_id;
+    this.server.to(room_id).emit('new_message', payload);
   }
 }

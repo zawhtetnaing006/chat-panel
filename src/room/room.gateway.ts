@@ -24,16 +24,11 @@ export class RoomGateway {
     client['user'] = authenticatedUser;
   }
 
-  @SubscribeMessage('new_message')
-  handleMessage(client: any, payload: any): string {
-    return 'Hello world!';
-  }
-
   @SubscribeMessage('join_room')
   handleJoinRoom(client: Socket, payload: any) {
     const room_id = JSON.parse(payload).room_id;
     const joinRoomEvent = new JoinRoomEvent(room_id, client['user']?.id);
-    this.eventEmiiter.emitAsync('room.join',joinRoomEvent);
-    this.server.socketsJoin(payload?.room_id);
+    this.eventEmiiter.emitAsync('room.join', joinRoomEvent);
+    this.server.socketsJoin(room_id);
   }
 }
