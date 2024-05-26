@@ -6,6 +6,7 @@ import {
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { Logger } from '@nestjs/common';
+import { NewMessageEvent } from './events/message.new.event';
 
 @WebSocketGateway(4100)
 export class MessageGateway {
@@ -23,8 +24,15 @@ export class MessageGateway {
         throw new Error('Invalid payload format');
       }
 
+      if(!parsedPayload.text_message|| parsedPayload.text_message == '') {
+        throw new Error('Messge is empty');
+      }
+
       const room_id = parsedPayload.room_id;
-      this.server.to(room_id).emit('new_message', payload);
+      const user_id = client['user']?.id;
+      
+      const newMessageEvent = new NewMessageEvent(user_id, room_id, parsedPayload.text_message);
+      this.eventEmitter.emit('message.new',newMessageEvent);
     } catch (error) {
       this.logger.error('Error handling new_message', error);
       client.emit('error', 'An error occurred while processing your message');

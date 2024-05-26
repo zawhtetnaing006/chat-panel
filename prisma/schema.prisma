@@ -38,8 +38,9 @@ model UserRoom {
   user_id                   String
   room                      Room            @relation(fields: [room_id], references: [id])
   room_id                   String
+  unread_message_count      Int             @default(0)
+  last_checked_at           DateTime        @default(now())
   created_at                DateTime        @default(now())
-  updated_at                DateTime        @updatedAt
   deleted_at                DateTime?
   @@id([user_id, room_id])
 }

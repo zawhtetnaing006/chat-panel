@@ -13,7 +13,6 @@ import {
 import { MessageService } from './message.service';
 import { sendMessageDto } from './dto/send-message.dto';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
-import { RoomService } from 'src/room/room.service';
 import { ApiResponse } from 'src/helper/api-response';
 import { findAllMessageDto } from './dto/find-all-message.dto';
 import { MessageGuard } from './message.guard';
@@ -32,7 +31,6 @@ import { ListenerResponse } from 'src/helper/listener-response';
 export class MessageController {
   constructor(
     private readonly messageService: MessageService,
-    private readonly roomService: RoomService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 

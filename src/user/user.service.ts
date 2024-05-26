@@ -3,13 +3,13 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { v4 as uuid } from 'uuid';
 import { findAllUserDto } from './dto/find-all-user.dto';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
-
+  private readonly logger = new Logger(UserService.name)
   async create(createUserDto: CreateUserDto) {
     const user = {
       id: uuid(),
@@ -47,7 +47,7 @@ export class UserService {
         },
       });
     } catch (e) {
-      user = null;
+      this.logger.log("Error while finding user!",e);
     }
 
     return user;

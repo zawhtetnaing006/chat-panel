@@ -24,8 +24,13 @@ export class AuthGuard implements CanActivate {
       req.headers.clientkey,
     );
     if (apiSecret && apiSecret == process.env.API_SECRET) {
-      const result = await this.userService.findOne(user_id);
-      req.user = result;
+      if(user_id) {
+        const result = await this.userService.findOne(user_id);
+        if(result?.deleted_at) {
+          throw new HttpException('This user is suspended!', HttpStatus.UNAUTHORIZED);
+        }
+        req.user = result;
+      }
       isAuthenicated = true;
     }
 

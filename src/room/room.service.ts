@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -8,10 +8,13 @@ import { Prisma, Room, User } from '@prisma/client';
 @Injectable()
 export class RoomService {
   constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(RoomService.name);
   async create(createRoomDto: CreateRoomDto): Promise<Room | null> {
-    const data = {
-      name: createRoomDto.name,
-      users: {
+    const data: any = {
+      name: createRoomDto.name
+    };
+    if(Array.isArray(createRoomDto.users) && createRoomDto.users.length > 0) {
+      data.users = {
         create: createRoomDto.users.map((user) => {
           return {
             user: {
@@ -21,8 +24,8 @@ export class RoomService {
             },
           };
         }),
-      },
-    };
+      }
+    }
     let room;
     try {
       room = await this.prisma.room.create({
@@ -31,7 +34,8 @@ export class RoomService {
           users: true,
         },
       });
-    } catch ({ name, message }) {
+    } catch (error) {
+      this.logger.error('Error while creating room!',error);
       room = null;
     }
     return room;
