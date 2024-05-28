@@ -1,0 +1,40 @@
+version: "3.8"
+networks: 
+  chat-panel-network:
+services:
+  chat-db:
+    image: mysql:5.7
+    container_name: chat-db
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: chat
+    volumes:
+      - ./data/chat:/var/lib/mysql
+    networks:
+      - chat-panel-network
+
+  chat-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chat-app
+    ports:
+      - 3000:3000
+    networks: 
+      - chat-panel-network
+    depends_on:
+      - chat-db
+    command: > 
+      sh -c "
+      npx prisma generate &&
+      npx prisma migrate deploy &&
+      npm run start:dev"
+  adminer:
+    image: adminer
+    ports:
+      - '8080:8080'
+    networks: 
+      - chat-panel-network
