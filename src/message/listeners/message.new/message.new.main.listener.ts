@@ -1,16 +1,20 @@
-import { OnEvent } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Injectable, Logger } from '@nestjs/common';
-import { NewMessageEvent } from '../events/message.new.event';
-import { MessageService } from '../message.service';
+import { NewMessageEvent } from '../../events/message.new.event';
+import { MessageService } from '../../message.service';
 import { ListenerResponse } from 'src/helper/listener-response';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
+import { NewMessageSuccessEvent } from 'src/message/events/message.new.success.event';
 
 @Injectable()
 @WebSocketGateway(4100)
 export class NewMessageListener {
   private readonly logger = new Logger(NewMessageListener.name);
-  constructor(private readonly messageService: MessageService) {}
+  constructor(
+    private readonly messageService: MessageService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   @WebSocketServer()
   server: Server;
@@ -24,6 +28,10 @@ export class NewMessageListener {
         newMessageEvent.text_message,
       );
       if (!message) throw new Error("Can't create message");
+
+      const newMessageSuccessEvent = new NewMessageSuccessEvent(message);
+
+      this.eventEmitter.emit('message.new.success', newMessageSuccessEvent);
       this.server.to(newMessageEvent.room_id).emit('new_message', message);
       return new ListenerResponse('main', message);
     } catch (error) {
