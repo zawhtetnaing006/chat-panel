@@ -8,7 +8,7 @@ import { JoinRoomEvent } from './events/room.join.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Logger } from '@nestjs/common';
 
-@WebSocketGateway(4100)
+@WebSocketGateway()
 export class RoomGateway {
   constructor(private readonly eventEmiiter: EventEmitter2) {}
   private readonly logger = new Logger(RoomGateway.name);

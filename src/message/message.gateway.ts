@@ -8,7 +8,7 @@ import { Socket, Server } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { NewMessageEvent } from './events/message.new.event';
 
-@WebSocketGateway(4100)
+@WebSocketGateway()
 export class MessageGateway {
   @WebSocketServer()
   server: Server;

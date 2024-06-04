@@ -3,7 +3,7 @@ import { OnGatewayConnection, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { AuthService } from './auth.service';
 
-@WebSocketGateway(4100)
+@WebSocketGateway()
 export class AuthGateway implements OnGatewayConnection {
   constructor(private readonly authService: AuthService) {}
 
