@@ -1,7 +1,8 @@
 # Auth
 ## Chat Service that can be reused for different type of projects
 
-API documentation path is {host}/docs
+### API documentation path is {host}/docs.
+
 Authentication in the Chat Panel is managed through two tokens:
 
 1. **API Token**
