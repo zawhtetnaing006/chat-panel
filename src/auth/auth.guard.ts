@@ -4,10 +4,11 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  Logger,
 } from '@nestjs/common';
 import { Request } from 'express';
 
-import { JsonWebTokenError, JwtService, TokenExpiredError } from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import { Reflector } from '@nestjs/core';
 
@@ -18,6 +19,7 @@ export class AuthGuard implements CanActivate {
     private readonly userService: UserService,
     private readonly reflector: Reflector,
   ) {}
+  readonly logger = new Logger(AuthGuard.name);
   async canActivate(context: ExecutionContext) {
     const isPublic = this.reflector.get<boolean>(
       'isPublic',
@@ -54,13 +56,7 @@ export class AuthGuard implements CanActivate {
         req.user = payload;
         isAuthenicated = true;
       } catch (err) {
-        if (err instanceof TokenExpiredError) {
-          throw new HttpException('Expired Token!', HttpStatus.UNAUTHORIZED);
-        }
-
-        if (err instanceof JsonWebTokenError) {
-          throw new HttpException('Invalid Token!', HttpStatus.UNAUTHORIZED);
-        }
+        this.logger.log(err);
         isAuthenicated = false;
       }
     }
