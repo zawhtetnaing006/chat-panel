@@ -8,7 +8,7 @@ import {
   Get,
   Query,
   UseGuards,
-  HttpException,
+  Logger,
 } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { sendMessageDto } from './dto/send-message.dto';
@@ -17,8 +17,7 @@ import { ApiResponse } from 'src/helper/api-response';
 import { findAllMessageDto } from './dto/find-all-message.dto';
 import { MessageGuard } from './message.guard';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { NewMessageEvent } from './events/message.new.event';
-import { ListenerResponse } from 'src/helper/listener-response';
+import { NewMessageSuccessEvent } from './events/message.new.success.event';
 
 @Controller('room/:room_id/message')
 @ApiTags('Message')
@@ -33,6 +32,7 @@ export class MessageController {
     private readonly messageService: MessageService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
+  private logger = new Logger(MessageController.name);
 
   @Post('send')
   async create(
@@ -41,42 +41,22 @@ export class MessageController {
     @Request() req,
   ) {
     const response = new ApiResponse();
-    const newMessageEvent = new NewMessageEvent(
-      req.user.id,
-      room_id,
-      sendMessageDto.textMessage,
-    );
-
     try {
-      const results = await this.eventEmitter.emitAsync(
-        'message.new',
-        newMessageEvent,
+      const message = await this.messageService.sendMessage(
+        room_id,
+        req.user.id,
+        sendMessageDto.textMessage,
       );
+      if (!message) throw new Error("Can't create message");
 
-      if (!results.every((result) => result instanceof ListenerResponse)) {
-        throw new HttpException(
-          'Invalid response from listeners',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
-
-      const mainResult = results.find((result) => result.type === 'main');
-
-      if (!mainResult) {
-        throw new HttpException(
-          'There must be one main listener',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+      const newMessageSuccessEvent = new NewMessageSuccessEvent(message);
+      this.eventEmitter.emit('message.new.success', newMessageSuccessEvent);
 
       response.statusCode = HttpStatus.OK;
       response.message = ['Successfully sent message'];
-      response.content = mainResult.content;
+      response.content = message;
     } catch (error) {
-      throw new HttpException(
-        'Failed to process message',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      this.logger.error(error);
     }
 
     return response;

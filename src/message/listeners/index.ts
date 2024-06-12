@@ -1,4 +1,4 @@
 import { NewMessageNotiListener } from './message.new.success/message.new.noti.listener';
-import { NewMessageListener } from './message.new/message.new.main.listener';
+import { NewMessageReveivedListener } from './message.new.success/message.new.reveived';
 
-export const Listeners = [NewMessageListener, NewMessageNotiListener];
+export const Listeners = [NewMessageNotiListener, NewMessageReveivedListener];
