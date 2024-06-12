@@ -15,27 +15,28 @@ services:
       - ./data/chat:/var/lib/mysql
     networks:
       - chat-panel-network
-  # chat-app:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: chat-app
-  #   volumes: 
-  #     - ./src:/app/src
-  #   ports:
-  #     - 3000:3000
-  #   networks: 
-  #     - chat-panel-network
-  #   depends_on:
-  #     - chat-db
-  #   command: > 
-  #     sh -c "
-  #     npx prisma generate &&
-  #     npx prisma migrate deploy &&
-  #     npm run start:dev"
-  # adminer:
-  #   image: adminer
-  #   ports:
-  #     - '8080:8080'
-  #   networks: 
-  #     - chat-panel-network
+  chat-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chat-app
+    volumes: 
+      - ./src:/app/src
+      - ./prisma:/app/prisma
+    ports:
+      - 3000:3000
+    networks: 
+      - chat-panel-network
+    depends_on:
+      - chat-db
+    command: > 
+      sh -c "
+      npx prisma generate &&
+      npx prisma migrate deploy &&
+      npm run start:dev"
+  adminer:
+    image: adminer
+    ports:
+      - '8080:8080'
+    networks: 
+      - chat-panel-network
