@@ -9,14 +9,25 @@ import { Request } from 'express';
 
 import { JsonWebTokenError, JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
+import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
+    private readonly reflector: Reflector,
   ) {}
   async canActivate(context: ExecutionContext) {
+    const isPublic = this.reflector.get<boolean>(
+      'isPublic',
+      context.getHandler(),
+    );
+
+    if (isPublic) {
+      return true;
+    }
+
     let isAuthenicated = false;
     const req = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(req);
