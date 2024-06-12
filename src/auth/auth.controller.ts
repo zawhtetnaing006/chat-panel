@@ -25,10 +25,10 @@ export class AuthController {
       return new ApiResponse(['User not found!'], HttpStatus.NOT_FOUND);
     }
 
-    if(user.deleted_at) {
+    if (user.deleted_at) {
       return new ApiResponse(['This user is supended!'], HttpStatus.NOT_FOUND);
     }
-    
+
     const jwt_token = await this.authService.init(user);
     return new ApiResponse(['Successfully authenticated!'], HttpStatus.OK, {
       token: jwt_token,

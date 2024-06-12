@@ -24,15 +24,19 @@ export class MessageGateway {
         throw new Error('Invalid payload format');
       }
 
-      if(!parsedPayload.text_message|| parsedPayload.text_message == '') {
+      if (!parsedPayload.text_message || parsedPayload.text_message == '') {
         throw new Error('Messge is empty');
       }
 
       const room_id = parsedPayload.room_id;
       const user_id = client['user']?.id;
-      
-      const newMessageEvent = new NewMessageEvent(user_id, room_id, parsedPayload.text_message);
-      this.eventEmitter.emit('message.new',newMessageEvent);
+
+      const newMessageEvent = new NewMessageEvent(
+        user_id,
+        room_id,
+        parsedPayload.text_message,
+      );
+      this.eventEmitter.emit('message.new', newMessageEvent);
     } catch (error) {
       this.logger.error('Error handling new_message', error);
       client.emit('error', 'An error occurred while processing your message');

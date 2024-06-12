@@ -1,3 +1,3 @@
-import { JoinRoomListener } from "./room.join.main.listener"
+import { JoinRoomListener } from './room.join.main.listener';
 
-export const Listeners = [JoinRoomListener]
+export const Listeners = [JoinRoomListener];

@@ -11,9 +11,9 @@ export class RoomService {
   private readonly logger = new Logger(RoomService.name);
   async create(createRoomDto: CreateRoomDto): Promise<Room | null> {
     const data: any = {
-      name: createRoomDto.name
+      name: createRoomDto.name,
     };
-    if(Array.isArray(createRoomDto.users) && createRoomDto.users.length > 0) {
+    if (Array.isArray(createRoomDto.users) && createRoomDto.users.length > 0) {
       data.users = {
         create: createRoomDto.users.map((user) => {
           return {
@@ -24,7 +24,7 @@ export class RoomService {
             },
           };
         }),
-      }
+      };
     }
     let room;
     try {
@@ -35,7 +35,7 @@ export class RoomService {
         },
       });
     } catch (error) {
-      this.logger.error('Error while creating room!',error);
+      this.logger.error('Error while creating room!', error);
       room = null;
     }
     return room;

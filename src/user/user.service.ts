@@ -9,7 +9,7 @@ import { Prisma } from '@prisma/client';
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
-  private readonly logger = new Logger(UserService.name)
+  private readonly logger = new Logger(UserService.name);
   async create(createUserDto: CreateUserDto) {
     const user = {
       id: uuid(),
@@ -47,7 +47,7 @@ export class UserService {
         },
       });
     } catch (e) {
-      this.logger.log("Error while finding user!",e);
+      this.logger.log('Error while finding user!', e);
     }
 
     return user;
