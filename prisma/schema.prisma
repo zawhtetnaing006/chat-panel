@@ -47,19 +47,29 @@ model UserRoom {
 }
 
 model Message {
-  id           String       @id @unique @default(uuid())
+  id           String        @id @unique @default(uuid())
   room_id      String
-  room         Room         @relation(fields: [room_id], references: [id])
+  room         Room          @relation(fields: [room_id], references: [id])
   text_message TextMessage?
+  file_message FileMessage[]
   user_id      String
-  user         User         @relation(fields: [user_id], references: [id])
-  created_at   DateTime     @default(now())
+  user         User          @relation(fields: [user_id], references: [id])
+  created_at   DateTime      @default(now())
   deleted_at   DateTime?
 }
 
 model TextMessage {
   id         Int     @id @default(autoincrement())
   content    String  @db.Text
+  message_id String  @unique
+  message    Message @relation(fields: [message_id], references: [id])
+}
+
+model FileMessage {
+  id         Int     @id @default(autoincrement())
+  url        String
+  type       String
+  size       String
   message_id String  @unique
   message    Message @relation(fields: [message_id], references: [id])
 }
