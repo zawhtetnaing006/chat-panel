@@ -14,51 +14,52 @@ datasource db {
 }
 
 model User {
-  id                        String             @unique @id
-  nickname                  String 
-  created_at                DateTime        @default(now())
-  updated_at                DateTime        @updatedAt
-  deleted_at                DateTime?
-  rooms                     UserRoom[]
-  messages                  Message[]
+  id         String     @id @unique
+  nickname   String
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  deleted_at DateTime?
+  rooms      UserRoom[]
+  messages   Message[]
 }
 
 model Room {
-  id                        String          @unique @id @default(uuid())
-  name                      String          
-  created_at                DateTime        @default(now())
-  updated_at                DateTime        @updatedAt
-  deleted_at                DateTime?
-  messages                  Message[]
-  users                    UserRoom[]
+  id         String     @id @unique @default(uuid())
+  name       String
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  deleted_at DateTime?
+  messages   Message[]
+  users      UserRoom[]
 }
 
 model UserRoom {
-  user                      User            @relation(fields: [user_id], references: [id])
-  user_id                   String
-  room                      Room            @relation(fields: [room_id], references: [id])
-  room_id                   String
-  unread_message_count      Int             @default(0)
-  last_checked_at           DateTime        @default(now())
-  created_at                DateTime        @default(now())
-  deleted_at                DateTime?
+  user                 User      @relation(fields: [user_id], references: [id])
+  user_id              String
+  room                 Room      @relation(fields: [room_id], references: [id])
+  room_id              String
+  unread_message_count Int       @default(0)
+  last_checked_at      DateTime  @default(now())
+  created_at           DateTime  @default(now())
+  deleted_at           DateTime?
+
   @@id([user_id, room_id])
 }
 
 model Message {
-  id                        String          @unique @id @default(uuid())
-  room_id                   String
-  room                      Room            @relation(fields: [room_id],references: [id])
-  text_message              TextMessage?     
-  user_id                   String
-  user                      User            @relation(fields: [user_id],references: [id])
-  created_at                DateTime        @default(now())
-  deleted_at                DateTime?
+  id           String       @id @unique @default(uuid())
+  room_id      String
+  room         Room         @relation(fields: [room_id], references: [id])
+  text_message TextMessage?
+  user_id      String
+  user         User         @relation(fields: [user_id], references: [id])
+  created_at   DateTime     @default(now())
+  deleted_at   DateTime?
 }
 
 model TextMessage {
-  id                        String          @unique @id @default(uuid())
-  content                   String          @db.Text
-  message_id                String          @unique
-  message                   Message         @relation(fields: [message_id],references: [id])
+  id         Int     @id @default(autoincrement())
+  content    String  @db.Text
+  message_id String  @unique
+  message    Message @relation(fields: [message_id], references: [id])
 }
