@@ -1,4 +1,14 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 export class sendMessageDto {
   textMessage: string;
-  fileMessage: File;
+  @ApiProperty({
+    type: 'array',
+    items: {
+      description: 'file message',
+      type: 'string',
+      format: 'binary',
+    },
+  })
+  fileMessages: Express.Multer.File[];
 }

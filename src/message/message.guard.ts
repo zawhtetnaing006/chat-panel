@@ -27,7 +27,7 @@ export class MessageGuard implements CanActivate {
       where: {
         id: req.params.roomd_id,
         users: {
-          every: {
+          some: {
             user_id: req.user.id,
           },
         },
