@@ -11,6 +11,9 @@ import {
   Logger,
   UseInterceptors,
   UploadedFiles,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
 } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { sendMessageDto } from './dto/send-message.dto';
@@ -26,6 +29,7 @@ import { MessageGuard } from './message.guard';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NewMessageSuccessEvent } from './events/message.new.success.event';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileMessageValidator } from './validator/file-message.validator';
 
 @Controller('room/:room_id/message')
 @ApiTags('Message')
@@ -44,14 +48,21 @@ export class MessageController {
 
   @Post('send')
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FilesInterceptor('fileMessages'))
+  @UseInterceptors(
+    FilesInterceptor('fileMessages', 10, {
+      dest: './upload',
+    }),
+  )
   async create(
     @Param('room_id') room_id: string,
     @Body() sendMessageDto: sendMessageDto,
     @Request() req,
-    @UploadedFiles() files: Array<Express.Multer.File>,
+    @UploadedFiles(new ParseFilePipe(FileMessageValidator))
+    files: Array<Express.Multer.File>,
   ) {
-    console.log(files);
+    if (files.length == 0 && !sendMessageDto.textMessage)
+      return new ApiResponse(['Message is emtpy!'], HttpStatus.BAD_REQUEST);
+
     const response = new ApiResponse();
     try {
       const message = await this.messageService.sendMessage(

@@ -28,10 +28,6 @@ export class MessageGateway {
         throw new Error('Invalid payload format');
       }
 
-      if (!parsedPayload.text_message || parsedPayload.text_message == '') {
-        throw new Error('Messge is empty');
-      }
-
       const room_id = parsedPayload.room_id;
       const user_id = client['user']?.id;
 
